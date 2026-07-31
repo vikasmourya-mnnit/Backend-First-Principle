@@ -1,0 +1,132 @@
+Core HTTP Principles [
+00:11
+Opens in a new window]
+Statelessness: HTTP has no memory of past interactions. Each request must be self-contained and carry all necessary metadata, such as headers, tokens, or cookies. This simplifies server architecture, improves fault tolerance, and allows easy horizontal scaling.
+
+Client-Server Model: Communication is strictly initiated by the client (browser or app), and the server host processes requests and returns appropriate responses (JSON, HTML, text, or errors).
+
+2. Transport Protocol & OSI Layer Focus [
+03:33
+Opens in a new window]
+HTTP vs. HTTPS: HTTPS is simply HTTP wrapped with TLS/SSL encryption and certificate verification.
+
+Transport Layer (TCP vs. UDP): HTTP relies on TCP for reliable, connection-oriented data transfer (handling packet ordering and three-way handshakes).
+
+OSI Model Context: Backend engineers primarily operate at Layer 7 (Application Layer), treating underlying lower-layer networking details as abstractions.
+
+3. Evolution of HTTP Versions [
+05:47
+Opens in a new window]
+HTTP 1.0: Required establishing and closing a new TCP connection for every single request/response, creating high overhead.
+
+HTTP 1.1: Introduced persistent connections (Keep-Alive), chunked transfer encoding, and improved caching mechanisms.
+
+HTTP 2.0: Added multiplexing over a single TCP connection, binary framing instead of plain text, HPACK header compression, and server push.
+
+HTTP 3.0: Built on QUIC (UDP-based), removing TCP head-of-line blocking while offering lower latency and faster connection setups.
+
+4. Anatomy of HTTP Messages [
+07:25
+Opens in a new window]
+Request Structure: Consists of the Request Method, Resource URL, HTTP Version, Request Headers (key-value pairs), a blank line delimiter, and an optional Request Body.
+
+Response Structure: Consists of the HTTP Version, Status Code & Reason Phrase, Response Headers, a blank line delimiter, and an optional Response Body.
+
+5. Categories of HTTP Headers [
+09:09
+Opens in a new window]
+Headers act like shipping labels on a parcel—allowing intermediaries and servers to inspect metadata without opening the payload body.
+
+Request Headers: User-Agent, Authorization, Accept.
+
+General Headers: Date, Cache-Control, Connection.
+
+Representation Headers: Content-Type, Content-Length, Content-Encoding, ETag.
+
+Security Headers: Strict-Transport-Security (HSTS), Content-Security-Policy (CSP), X-Frame-Options, X-Content-Type-Options, and Set-Cookie (with HttpOnly and Secure flags).
+
+Extensibility & Remote Control: Headers allow custom metadata additions and serve as remote control parameters to direct how servers process or return resources.
+
+6. HTTP Methods & Idempotency [
+16:14
+Opens in a new window]
+GET: Fetches data without modifying server state (Idempotent).
+
+POST: Creates new server resources (Non-idempotent).
+
+PATCH: Applies partial updates or appends data (Non-idempotent).
+
+PUT: Completely replaces an existing resource or creates it if missing (Idempotent).
+
+DELETE: Removes a resource from the server (Idempotent).
+
+OPTIONS: Queries the communication options and capabilities supported by the server.
+
+7. CORS & Preflight Requests [
+20:11
+Opens in a new window]
+Same-Origin Policy (SOP): Browsers restrict scripts on one origin from accessing resources on a different origin unless explicitly permitted via Cross-Origin Resource Sharing (CORS) headers.
+
+Simple Requests: Standard GET/POST/HEAD requests with basic headers. The browser checks if the server responds with Access-Control-Allow-Origin.
+
+Preflight Requests: Triggered when using non-simple methods (PUT/DELETE), custom headers (e.g., Authorization), or non-standard content types (e.g., application/json). The browser sends an automatic OPTIONS request using Access-Control-Request-Method and Access-Control-Request-Headers.
+
+Burp Suite Demo [
+29:44
+Opens in a new window]: Live inspection demonstrating how browsers intercept missing CORS headers and validate 204 No Content preflight responses.
+
+8. Standard HTTP Status Codes [
+38:47
+Opens in a new window]
+1xx (Informational): 100 Continue, 101 Switching Protocols.
+
+2xx (Success): 200 OK, 201 Created, 204 No Content.
+
+3xx (Redirection): 301 Moved Permanently, 302 Found (Temporary), 304 Not Modified.
+
+4xx (Client Errors): 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 405 Method Not Allowed, 409 Conflict, 429 Too Many Requests.
+
+5xx (Server Errors): 500 Internal Server Error, 501 Not Implemented, 502 Bad Gateway, 503 Service Unavailable, 504 Gateway Timeout.
+
+Status Code Demo [
+52:17
+Opens in a new window]: Demonstrates client vs. server error behavior using interactive browser network tools.
+
+9. HTTP Caching Mechanism [
+55:24
+Opens in a new window]
+Stores response copies locally to minimize latency, bandwidth, and server load.
+
+Validation Flow: Uses Cache-Control (max-age), ETag (content hash), and Last-Modified.
+
+Conditional Requests: Client sends If-None-Match or If-Modified-Since. If unchanged, the server returns a lightweight 304 Not Modified status without a response body.
+
+10. Content Negotiation & Compression [
+01:02:28
+Opens in a new window]
+Negotiation Headers: Media types (Accept), language preferences (Accept-Language), and compression encoding (Accept-Encoding).
+
+HTTP Compression [
+01:06:51
+Opens in a new window]: Uses algorithms like Gzip or Deflate. A live demonstration showed a 26 MB JSON payload reduced down to 3.8 MB when Gzip compression was active.
+
+11. Persistent Connections (Keep-Alive) [
+01:08:54
+Opens in a new window]
+Reuses established TCP sockets across multiple request/response cycles rather than tearing them down every time.
+
+Configured using Connection: keep-alive alongside parameters like timeout and max.
+
+12. Handling Large Requests & Streaming [
+01:11:07
+Opens in a new window]
+Multipart Requests: Uploads large binary files in separated body chunks using Content-Type: multipart/form-data and a unique boundary string delimiter.
+
+Server Streaming: Uses Content-Type: text/event-stream with a persistent connection to stream continuous chunked data or events from server to client.
+
+13. HTTPS, SSL, and TLS Standards [
+01:15:16
+Opens in a new window]
+SSL vs. TLS: SSL is deprecated due to security vulnerabilities; TLS (version 1.3) is the modern standard.
+
+HTTPS Protocol: Combines HTTP with TLS to provide symmetric encryption, data integrity checks, and server identity validation using digital certificates.
