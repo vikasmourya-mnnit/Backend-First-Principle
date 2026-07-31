@@ -1,0 +1,37 @@
+1. Core Concept of Routing
+The “What” vs. “Where”: The HTTP method (GET, POST, PUT, DELETE) represents intent or action (“what” to do) [00:14]. The route (URL/path) defines the target resource (“where” to perform the action) [00:42].
+
+Definition of Routing: Routing is the process of mapping a combination of HTTP method + URL path to specific server-side logic or handlers [01:42].
+
+Unique Route Keys: The server concatenates the HTTP method and path to create a unique route key (e.g., GET /api/books vs. POST /api/books), ensuring different actions on the same route never clash [04:03].
+
+2. Types of Routes
+Static Routes: Paths with fixed string values and no dynamic components (e.g., /api/books) [04:45].
+
+Dynamic Routes & Path Parameters:
+Routes containing variable placeholders, typically prefixed with a colon (e.g., /api/users/:id) [06:49].
+Values passed inside the URL path (like /api/users/123) are path or route parameters [08:50].
+The server extracts these variables (which are converted to strings) to run specific logic, such as looking up an ID in a database [05:51].
+
+3. Query Parameters & Pagination
+Definition: Parameters attached to the end of a URL after a ? in key-value pairs (e.g., /api/search?query=some+value) [10:17].
+Why Use Query Params? Since RESTful GET requests do not have request bodies, query parameters provide a clean, standardized way to pass metadata without cluttering the semantic path [10:51].
+Use Cases: Filtering, sorting, and pagination (e.g., passing ?page=2&limit=20 to control chunked data responses) [14:46].
+
+4. Nested Routes
+Expressing hierarchical relationships between resources by layering paths (e.g., /api/users/123/posts/456) [16:28].
+
+Hierarchical Progression:
+/api/users → Fetch all users [16:49].
+/api/users/123 → Fetch user #123 [17:06].
+/api/users/123/posts → Fetch all posts belonging to user #123 [17:47].
+/api/users/123/posts/456 → Fetch specific post #456 of user #123 [18:06].
+
+5. Route Versioning & Deprecation
+Versioning (v1 vs v2): Including explicit version prefixes in the URL (e.g., /api/v1/products vs. /api/v2/products) [19:12].
+Purpose: Allows introducing breaking changes or new data shapes without breaking existing client implementations (e.g., web clients vs. mobile apps) [20:30].
+Deprecation Workflow: Provides frontend/client teams a grace period to migrate to the new endpoint version before older versions are phased out [21:29].
+
+6. Catch-All Routes
+Wildcard Fallbacks: Using a fallback route (like /*) at the very end of all route definitions [22:52].
+Purpose: Intercepts requests sent to non-existent endpoints and returns custom, user-friendly 404 Not Found messages instead of unhandled null errors [23:16].
