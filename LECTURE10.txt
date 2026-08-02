@@ -1,0 +1,145 @@
+
+Here are my detailed notes summarizing the tutorial on backend architecture design patterns, covering controllers, services, repositories, middlewares, and request context from the video (1156) 10. What are controllers, services, repositories, middlewares and request context?:
+
+1. Request Lifecycle & Layered Architecture
+When an HTTP request enters the server via an OS port, it undergoes a structured request lifecycle inside the server [
+01:40
+Opens in a new window]. Rather than putting all server logic into a single monolithic function, backend code is split into three main layers for scalability, maintainability, easier debugging, and feature addition [
+04:05
+Opens in a new window].
+
+2. The Three Application Layers
+A. Controllers / Handlers (HTTP & Input/Output Layer) [
+04:20
+Opens in a new window]
+Primary Responsibility: Controls data flow to/from the client and manages HTTP interactions [
+25:12
+Opens in a new window].
+
+Inputs: Receives native runtime objects: request (to read data/headers) and response (to modify headers and write responses) [
+04:58
+Opens in a new window].
+
+Execution Steps:
+
+Deserialization / Binding: Converts serializable JSON inputs into native language data structures (Go structs, Python dicts/classes, Rust structs) [
+09:21
+Opens in a new window]. Returns 400 Bad Request immediately if deserialization fails [
+11:21
+Opens in a new window].
+
+Validation & Transformation: Validates incoming payloads and sanitizes/transforms data (e.g., injecting default query parameters if optional values like sorting fields are omitted) [
+13:14
+Opens in a new window], [
+16:56
+Opens in a new window].
+
+Delegation & Response: Calls the service layer with sanitized inputs, receives the result, chooses the proper HTTP status code (200, 201, 204, 400, 500), and returns the response [
+25:40
+Opens in a new window].
+
+B. Service Layer (Business Logic) [
+18:57
+Opens in a new window]
+Primary Responsibility: Houses core business calculations, processing, workflows, and orchestration [
+23:59
+Opens in a new window].
+
+Key Constraint: Completely decoupled from HTTP [
+18:57
+Opens in a new window]. It should be written as standard pure functions without referencing HTTP status codes, request parameters, or client objects [
+19:12
+Opens in a new window].
+
+Orchestration: Can call multiple repository methods, trigger external notifications/emails, or integrate with third-party APIs [
+20:20
+Opens in a new window], [
+23:05
+Opens in a new window].
+
+C. Repository / Database Layer (Data Access) [
+21:04
+Opens in a new window]
+Primary Responsibility: Executes raw database operations (queries, inserts, updates, deletes) and returns raw persistence results [
+21:47
+Opens in a new window].
+
+Key Constraint (Single Responsibility): Each repository method should fulfill exactly one specific database operation (e.g., GetBookByID vs GetAllBooks) rather than branching logic based on optional flags [
+22:17
+Opens in a new window].
+
+3. Middlewares
+Middlewares are optional functions executed along the request boundary path—between initial server entry, routing, handlers, and sending responses back to the client [
+28:52
+Opens in a new window].
+
+Core Properties
+Parameters: Receives req, res, and a next() function [
+30:32
+Opens in a new window]. Calling next() transfers execution to the next processing context [
+31:25
+Opens in a new window].
+
+Purpose: Eliminates code duplication for cross-cutting concerns across hundreds of endpoints [
+33:26
+Opens in a new window]. Can terminate early and return a response before the request ever reaches heavy handler/service layers [
+32:51
+Opens in a new window].
+
+Execution Order: The order in which middlewares are registered is critical to how the request flows [
+36:17
+Opens in a new window].
+
+Common Use Cases & Examples
+CORS & Security: Checks origins and appends necessary response headers early [
+37:37
+Opens in a new window], [
+41:28
+Opens in a new window].
+
+Authentication & Authorization: Parses tokens (JWTs, Session IDs). Returns 401 Unauthorized immediately on failure; populates user credentials on success [
+41:50
+Opens in a new window].
+
+Rate Limiting: Tracks IP/Client request frequency to prevent abuse, returning 429 Too Many Requests if thresholds are exceeded [
+43:47
+Opens in a new window].
+
+Logging & Monitoring: Captures metrics, routes, methods, and timing for debugging and auditing [
+45:00
+Opens in a new window].
+
+Global Error Handling: Placed at the end of the middleware chain to catch unstructured errors thrown anywhere in handlers/services and format them into consistent JSON error payloads [
+45:47
+Opens in a new window], [
+47:34
+Opens in a new window].
+
+Compression & Parsing: Compresses payload bodies (e.g., Gzip) or parses incoming request formats [
+48:37
+Opens in a new window].
+
+4. Request Context
+Definition: A request-scoped key-value storage/state attached exclusively to a single HTTP request's execution lifecycle [
+51:54
+Opens in a new window].
+
+Decoupling Layers: Enables middlewares to pass internal state downstream to handlers without tightly coupling functions or trusting unverified client input [
+54:01
+Opens in a new window].
+
+Typical Applications:
+
+User Session Data: Storing verified user_id and roles extracted during authentication middleware so handlers can safely attach ownership during database writes [
+54:35
+Opens in a new window], [
+56:51
+Opens in a new window].
+
+Distributed Tracing: Attaching a unique Request ID (UUID) for logging and tracing calls across microservices [
+58:16
+Opens in a new window].
+
+Signal Cancellation: Passing timeout deadlines, context cancellations, or abort signals to downstream external calls [
+59:33
+Opens in a new window].

@@ -1,0 +1,469 @@
+# Authentication & Authorization Interview Questions and Answers
+
+## 1. What is Authentication?
+
+**Answer:**
+Authentication (AuthN) is the process of verifying a user's identity. It answers the question **"Who are you?"** Examples include passwords, OTPs, biometrics, and security keys.
+
+---
+
+## 2. What is Authorization?
+
+**Answer:**
+Authorization (AuthZ) determines what an authenticated user is allowed to access or perform. It answers the question **"What are you allowed to do?"**
+
+---
+
+## 3. What is the difference between Authentication and Authorization?
+
+| Authentication    | Authorization                   |
+| ----------------- | ------------------------------- |
+| Verifies identity | Verifies permissions            |
+| Happens first     | Happens after authentication    |
+| "Who are you?"    | "What can you do?"              |
+| Example: Login    | Example: Access Admin Dashboard |
+
+---
+
+## 4. Why do we need Authentication?
+
+**Answer:**
+Authentication ensures that only legitimate users can access a system and protects sensitive resources from unauthorized access.
+
+---
+
+## 5. Why do we need Authorization?
+
+**Answer:**
+Even after a user is authenticated, not every user should have the same permissions. Authorization restricts access based on roles or permissions.
+
+---
+
+# Sessions
+
+## 6. What is a Session?
+
+**Answer:**
+A session is a server-side mechanism used to maintain user state across multiple HTTP requests because HTTP is stateless.
+
+---
+
+## 7. Why are Sessions required?
+
+**Answer:**
+HTTP treats every request independently. Sessions allow the server to remember logged-in users across requests.
+
+---
+
+## 8. How does Session Authentication work?
+
+**Answer:**
+
+1. User logs in.
+2. Server verifies credentials.
+3. Server creates a Session ID.
+4. Session data is stored in Redis/Database.
+5. Session ID is sent to the browser as an HttpOnly cookie.
+6. Browser automatically sends the cookie with every request.
+7. Server validates the Session ID.
+
+---
+
+## 9. Where are Sessions stored?
+
+**Answer:**
+Modern applications commonly store sessions in:
+
+* Redis
+* Memcached
+* Relational Databases
+
+Redis is preferred because it provides very fast in-memory lookups.
+
+---
+
+## 10. What are the advantages of Sessions?
+
+**Answer:**
+
+* Easy logout
+* Easy token revocation
+* Real-time session management
+* More secure for web applications
+
+---
+
+## 11. What are the disadvantages of Sessions?
+
+**Answer:**
+
+* Requires server-side storage
+* Database/Redis lookup on every request
+* Harder to scale in distributed systems
+
+---
+
+# Cookies
+
+## 12. What is a Cookie?
+
+**Answer:**
+A cookie is a small piece of data stored by the browser and automatically sent with HTTP requests to the same domain.
+
+---
+
+## 13. What is an HttpOnly Cookie?
+
+**Answer:**
+An HttpOnly cookie cannot be accessed by JavaScript, protecting it from XSS attacks while still being automatically sent by the browser.
+
+---
+
+## 14. Why should Session IDs be stored in HttpOnly Cookies?
+
+**Answer:**
+To prevent malicious JavaScript from stealing Session IDs via Cross-Site Scripting (XSS).
+
+---
+
+# JWT
+
+## 15. What is JWT?
+
+**Answer:**
+JWT (JSON Web Token) is a stateless authentication token that contains user information and is digitally signed by the server.
+
+---
+
+## 16. What is the structure of JWT?
+
+**Answer:**
+JWT has three parts:
+
+```
+Header.Payload.Signature
+```
+
+Each part is Base64URL encoded.
+
+---
+
+## 17. What does the Header contain?
+
+**Answer:**
+
+* Token type (JWT)
+* Signing algorithm (HS256, RS256)
+
+---
+
+## 18. What does the Payload contain?
+
+**Answer:**
+Claims such as:
+
+* sub (User ID)
+* exp (Expiration)
+* iat (Issued At)
+* roles
+* email
+* Custom claims
+
+---
+
+## 19. What is the Signature used for?
+
+**Answer:**
+The signature ensures the token has not been modified and verifies that it was issued by the trusted server.
+
+---
+
+## 20. Why is JWT called Stateless?
+
+**Answer:**
+Because the server does not store session information. All required authentication data is inside the token itself.
+
+---
+
+## 21. Advantages of JWT?
+
+**Answer:**
+
+* Stateless
+* Scalable
+* Fast
+* Ideal for microservices
+* No database lookup required
+
+---
+
+## 22. Disadvantages of JWT?
+
+**Answer:**
+
+* Difficult to revoke before expiration
+* Token size is larger than Session IDs
+* Payload is readable (not encrypted by default)
+
+---
+
+## 23. Why is JWT difficult to revoke?
+
+**Answer:**
+The server doesn't store JWTs. Once issued, they remain valid until they expire unless additional mechanisms like blacklisting are used.
+
+---
+
+## 24. How can JWTs be revoked?
+
+**Answer:**
+A common production approach is to store revoked JWT IDs in Redis (blacklist) and check the blacklist during authentication.
+
+---
+
+# Stateful vs Stateless
+
+## 25. Difference between Stateful and Stateless Authentication?
+
+| Stateful                 | Stateless              |
+| ------------------------ | ---------------------- |
+| Session stored on server | No server-side session |
+| Uses Session ID          | Uses JWT               |
+| Easy revocation          | Difficult revocation   |
+| Requires Redis/DB lookup | No lookup required     |
+| Good for monoliths       | Good for microservices |
+
+---
+
+# API Keys
+
+## 26. What is API Key Authentication?
+
+**Answer:**
+API Key Authentication uses a randomly generated secret key that clients send with every request to identify themselves.
+
+---
+
+## 27. Where are API Keys used?
+
+**Answer:**
+
+* Machine-to-Machine communication
+* Developer APIs
+* Backend integrations
+
+---
+
+## 28. Disadvantages of API Keys?
+
+**Answer:**
+
+* If leaked, attackers gain access.
+* No user identity information.
+* Limited fine-grained authorization.
+
+---
+
+# OAuth 2.0
+
+## 29. Why was OAuth created?
+
+**Answer:**
+OAuth allows users to grant third-party applications limited access to their resources without sharing passwords.
+
+---
+
+## 30. What problem does OAuth solve?
+
+**Answer:**
+It prevents users from giving their account passwords to third-party applications.
+
+---
+
+## 31. What are the four OAuth Roles?
+
+**Answer:**
+
+* Resource Owner (User)
+* Client (Application)
+* Authorization Server
+* Resource Server
+
+---
+
+## 32. What is an Access Token?
+
+**Answer:**
+An Access Token is issued by the Authorization Server and allows a client to access protected resources.
+
+---
+
+## 33. Common OAuth Grant Types?
+
+**Answer:**
+
+* Authorization Code Flow
+* Client Credentials Flow
+* Device Code Flow
+
+---
+
+# OIDC
+
+## 34. What is OpenID Connect?
+
+**Answer:**
+OpenID Connect (OIDC) is an identity layer built on top of OAuth 2.0 that provides user authentication using an ID Token.
+
+---
+
+## 35. Difference between OAuth and OIDC?
+
+| OAuth                 | OIDC                           |
+| --------------------- | ------------------------------ |
+| Authorization         | Authentication + Authorization |
+| Access Token          | Access Token + ID Token        |
+| Permission delegation | User identity                  |
+
+---
+
+# RBAC
+
+## 36. What is RBAC?
+
+**Answer:**
+Role-Based Access Control assigns permissions to roles, and roles are assigned to users.
+
+---
+
+## 37. Why is RBAC used?
+
+**Answer:**
+It simplifies permission management and improves security by grouping permissions into roles.
+
+---
+
+## 38. How is RBAC implemented?
+
+**Answer:**
+
+1. Authenticate user.
+2. Retrieve user's role.
+3. Check required permission.
+4. Allow or deny access.
+
+---
+
+## 39. Which HTTP status code is returned when authentication succeeds but permission fails?
+
+**Answer:**
+**403 Forbidden**
+
+---
+
+## 40. Which HTTP status code is returned when authentication fails?
+
+**Answer:**
+**401 Unauthorized**
+
+---
+
+# Security
+
+## 41. Why should login APIs return generic error messages?
+
+**Answer:**
+To prevent user enumeration. Messages like "User not found" reveal whether an account exists.
+
+Use:
+
+> "Invalid username or password."
+
+---
+
+## 42. What is User Enumeration?
+
+**Answer:**
+An attack where attackers determine which usernames exist by analyzing login responses.
+
+---
+
+## 43. What is a Timing Attack?
+
+**Answer:**
+An attacker measures response times to infer whether a username exists based on how long authentication takes.
+
+---
+
+## 44. How can Timing Attacks be prevented?
+
+**Answer:**
+
+* Constant-time comparison
+* Dummy password hashing
+* Uniform response delays
+
+---
+
+## 45. What is Constant-Time Comparison?
+
+**Answer:**
+A comparison algorithm that takes the same amount of time regardless of where values differ, preventing timing leaks.
+
+---
+
+## 46. Why perform dummy password hashing?
+
+**Answer:**
+If the username doesn't exist, hashing a dummy password ensures the response time matches the case where the username exists, preventing attackers from distinguishing valid users.
+
+---
+
+# Frequently Asked Interview Questions
+
+### Q. Which is better: Session or JWT?
+
+**Answer:** Neither is universally better.
+
+* **Sessions** are ideal for traditional web applications due to easy revocation and server control.
+* **JWTs** are better for distributed systems and microservices because they are stateless and scale well.
+
+---
+
+### Q. Why shouldn't sensitive information be stored in JWT payloads?
+
+**Answer:** The payload is Base64URL encoded, **not encrypted**. Anyone with the token can decode and read its contents, so only non-sensitive claims should be included.
+
+---
+
+### Q. What is the biggest drawback of JWT?
+
+**Answer:** Early token revocation is difficult because the server doesn't maintain session state.
+
+---
+
+### Q. Explain the complete login flow using JWT.
+
+**Answer:**
+
+1. User submits credentials.
+2. Server validates them.
+3. Server creates and signs a JWT.
+4. JWT is returned to the client.
+5. Client stores the JWT.
+6. Client sends `Authorization: Bearer <JWT>` with each request.
+7. Server verifies the signature and processes the request if valid.
+
+---
+
+### Q. Explain the complete login flow using Sessions.
+
+**Answer:**
+
+1. User submits credentials.
+2. Server validates them.
+3. Server creates a Session ID.
+4. Session data is stored in Redis/Database.
+5. Session ID is sent in an HttpOnly cookie.
+6. Browser automatically includes the cookie in future requests.
+7. Server validates the Session ID before serving protected resources.

@@ -1,0 +1,749 @@
+# Authentication & Authorization — Interview Notes (Complete)
+
+# 1. Core Definitions
+
+## Authentication (AuthN)
+
+* **Definition:** Process of verifying a user's identity.
+* **Question it answers:** **"Who are you?"**
+* Happens before authorization.
+
+## Authorization (AuthZ)
+
+* **Definition:** Process of determining what an authenticated user is allowed to access or perform.
+* **Question it answers:** **"What are you allowed to do?"**
+* Happens after authentication.
+
+---
+
+# 2. Historical Evolution of Authentication
+
+Understanding this evolution helps explain why modern authentication protocols exist.
+
+### A. Implicit / Trust-Based Authentication (Pre-Industrial)
+
+* Relied entirely on human trust.
+* Community members recognized each other.
+* Example:
+
+  * Village elder vouching for someone.
+* **Problem:** Doesn't scale and depends on personal relationships.
+
+---
+
+### B. Possession-Based Authentication (Medieval Era)
+
+* Identity proved by possessing something.
+* Example:
+
+  * Wax seals on letters.
+* If someone had the sealed letter, they were assumed to be authentic.
+
+**Problems**
+
+* Forgery
+* Stolen seals
+* Early bypass attacks
+
+---
+
+### C. Knowledge-Based Authentication (Industrial Era)
+
+* Shifted to **"Something You Know."**
+* Example:
+
+  * Telegraph operators used secret passphrases.
+
+**Advantages**
+
+* Easier to verify remotely.
+
+**Problem**
+
+* Shared secret could be leaked.
+
+---
+
+### D. Digital Passwords & Hashing (1961)
+
+* MIT's **Compatible Time-Sharing System (CTSS)** introduced passwords for multi-user computers.
+
+Initially:
+
+* Passwords stored in plaintext.
+
+Problem:
+
+* Database leaks exposed every password.
+
+Solution:
+
+* Cryptographic hashing.
+
+Hashing:
+
+* Converts passwords into fixed-length irreversible hashes.
+
+Benefits:
+
+* Server never stores the actual password.
+* During login:
+
+  * User enters password.
+  * Password is hashed.
+  * Hash is compared with stored hash.
+
+---
+
+### E. Asymmetric Cryptography (1970s)
+
+Major breakthrough:
+
+* Diffie-Hellman Key Exchange
+
+Enabled:
+
+* Public Key Infrastructure (PKI)
+
+Eventually led to:
+
+* Kerberos
+* Ticket-based authentication systems
+
+Benefits:
+
+* Strong cryptographic identity verification.
+* Secure communication over insecure networks.
+
+---
+
+### F. Multi-Factor Authentication (MFA)
+
+Combines multiple authentication factors.
+
+#### Something You Know
+
+* Password
+* PIN
+
+#### Something You Have
+
+* OTP device
+* Security key
+* Phone authenticator
+
+#### Something You Are
+
+* Fingerprint
+* Face recognition
+* Retina scan
+
+Benefits:
+
+* Compromising one factor isn't enough.
+
+---
+
+### G. Modern Authentication Trends
+
+#### WebAuthn / FIDO
+
+* Passwordless authentication
+* Hardware-backed security
+
+#### Decentralized Identity
+
+* Blockchain-based identity systems
+
+#### Post-Quantum Cryptography
+
+* Authentication resistant to quantum attacks.
+
+---
+
+# 3. Core Technical Components
+
+## A. Sessions
+
+### Why Sessions Exist
+
+HTTP is **stateless**.
+
+Every request is independent.
+
+After login, the server needs a mechanism to remember users.
+
+Sessions solve this problem.
+
+---
+
+### Session Flow
+
+1. User logs in.
+2. Server validates credentials.
+3. Server creates a unique Session ID.
+4. Server stores:
+
+   * User ID
+   * Login timestamp
+   * Expiration
+   * Metadata
+5. Session stored in:
+
+   * Database
+   * Redis
+   * Memory store
+6. Server sends Session ID inside a cookie.
+7. Browser automatically sends cookie with every request.
+8. Server looks up Session ID.
+9. User is authenticated.
+
+---
+
+### Evolution of Session Storage
+
+Initially:
+
+* File-based storage
+
+Then:
+
+* Relational databases
+
+Now:
+
+* Redis
+* Memcached
+* Distributed in-memory caches
+
+Reason:
+
+* Extremely low latency lookups.
+
+---
+
+## B. JSON Web Token (JWT)
+
+Created to solve scalability problems in distributed microservices.
+
+Instead of storing sessions on the server, authentication information travels inside the token itself.
+
+---
+
+### JWT Structure
+
+```
+Header.Payload.Signature
+```
+
+Each section is Base64URL encoded.
+
+---
+
+### Header
+
+Contains:
+
+* Token type
+* Signing algorithm
+
+Example:
+
+```
+alg : HS256
+typ : JWT
+```
+
+---
+
+### Payload (Claims)
+
+Contains user information.
+
+Examples:
+
+* sub (User ID)
+* iat (Issued At)
+* exp (Expiration)
+* roles
+* email
+* custom claims
+
+---
+
+### Signature
+
+Generated using:
+
+* Header
+* Payload
+* Secret key
+
+Purpose:
+
+* Detect tampering.
+* Verify integrity.
+
+---
+
+### Advantages
+
+* Stateless
+* Highly scalable
+* Portable across microservices
+* No database lookup required
+
+---
+
+### Disadvantages
+
+Biggest interview question:
+
+**Token Revocation**
+
+Since the server stores no session state:
+
+* Once issued,
+* Token remains valid until expiration.
+
+Even if:
+
+* User logs out
+* Password changes
+* Account disabled
+
+The JWT remains valid unless extra mechanisms exist.
+
+---
+
+### Hybrid JWT Strategy
+
+Common production solution:
+
+Maintain a Redis blacklist.
+
+Flow:
+
+* Logout
+* Store revoked JWT ID in Redis
+* Check blacklist on every request
+
+Pros:
+
+* Allows revocation.
+
+Cons:
+
+* Loses complete statelessness.
+
+---
+
+## C. Cookies
+
+Browser-managed storage.
+
+Automatically attached to HTTP requests matching the domain.
+
+---
+
+### HttpOnly Cookie
+
+Purpose:
+
+* Prevent JavaScript from reading cookies.
+
+Protects against:
+
+* Cross-Site Scripting (XSS)
+
+Important:
+
+* Browser still sends the cookie automatically.
+* JavaScript cannot access it.
+
+---
+
+# 4. Four Main Types of Authentication
+
+## 1. Stateful Authentication
+
+### Flow
+
+1. User logs in.
+2. Server validates credentials.
+3. Creates Session ID.
+4. Stores session in Redis/DB.
+5. Sends Session ID via HttpOnly cookie.
+6. Browser sends cookie on each request.
+7. Server checks session store.
+
+### Best For
+
+* Traditional web applications
+* Monolithic architectures
+
+### Pros
+
+* Easy logout
+* Easy revocation
+* Real-time session control
+
+### Cons
+
+* Server memory/storage required
+* Database/Redis lookup on every request
+
+---
+
+## 2. Stateless Authentication
+
+### Flow
+
+1. User logs in.
+2. Server generates JWT.
+3. Client stores JWT.
+4. Client sends:
+
+```
+Authorization: Bearer <JWT>
+```
+
+5. Server validates signature.
+
+No session lookup required.
+
+### Best For
+
+* Microservices
+* Mobile APIs
+* Distributed systems
+
+### Pros
+
+* Extremely scalable
+* Fast
+* No session database
+
+### Cons
+
+* Difficult token revocation
+* Blacklisting adds complexity
+
+---
+
+## 3. API Key Authentication
+
+### Flow
+
+* User generates cryptographically random API key.
+* API key sent with every request.
+
+### Best For
+
+* Machine-to-Machine communication
+* Developer APIs
+
+### Pros
+
+* Simple
+* Long-lived
+
+### Cons
+
+* If leaked, attacker gains access.
+* Doesn't represent granular user identity.
+
+---
+
+## 4. OAuth 2.0 + OpenID Connect
+
+Used for delegated authorization.
+
+Example:
+
+* Login with Google
+* Login with Discord
+
+Benefits:
+
+* User never shares password with third-party applications.
+
+### Pros
+
+* Scoped permissions
+* No password sharing
+
+### Cons
+
+* More complex architecture
+
+---
+
+# 5. OAuth 2.0 & OpenID Connect (OIDC)
+
+## Why OAuth Exists
+
+Problem:
+Third-party apps previously required users to share their passwords.
+
+OAuth solved this by allowing delegated access using tokens.
+
+---
+
+## OAuth 2.0 Roles
+
+### Resource Owner
+
+* User
+
+### Client
+
+* Application requesting access
+
+### Authorization Server
+
+* Issues access tokens
+
+### Resource Server
+
+* API holding protected resources
+
+---
+
+## OAuth Grant Types
+
+### Authorization Code Flow
+
+* Secure server-side applications
+
+### Client Credentials Flow
+
+* Backend-to-backend (Machine-to-Machine)
+
+### Device Code Flow
+
+* Smart TVs
+* Consoles
+* Limited input devices
+
+---
+
+## OpenID Connect (OIDC)
+
+OAuth only provides:
+
+* Authorization
+
+OIDC adds:
+
+* Authentication
+
+Introduces:
+
+**ID Token (JWT)**
+
+Contains:
+
+* User identity
+* Profile information
+
+Interview one-liner:
+
+> OAuth = Authorization
+> OIDC = Authentication + OAuth
+
+---
+
+# 6. Authorization & Access Control (RBAC)
+
+## Role-Based Access Control
+
+Instead of assigning permissions directly to users:
+
+Permissions → Roles
+
+Roles → Users
+
+Example:
+
+Admin
+
+* Create user
+* Delete user
+* Edit user
+
+Editor
+
+* Edit content
+
+User
+
+* Read content
+
+---
+
+## Backend Enforcement
+
+Typical flow:
+
+1. Authenticate user.
+2. Validate token/session.
+3. Retrieve user's role.
+4. Check required permission.
+5. Allow or deny request.
+
+---
+
+## HTTP Status Code
+
+Authentication successful
++
+Permission denied
+
+Return:
+
+**403 Forbidden**
+
+---
+
+# 7. Critical Backend Security Best Practices (Interview Must-Knows)
+
+## A. Generic Error Messages (Prevent User Enumeration)
+
+### Mistake
+
+Returning:
+
+* "User not found"
+* "Incorrect password"
+
+### Risk
+
+Attackers can determine:
+
+* Which usernames exist.
+* Enables credential stuffing.
+* Enables targeted brute-force attacks.
+
+### Best Practice
+
+Always return generic responses such as:
+
+* "Invalid username or password"
+* "Authentication failed"
+
+Never reveal whether the username or password was incorrect.
+
+---
+
+## B. Timing Attacks
+
+### Vulnerability
+
+Case 1:
+
+* Username not found.
+* Response:
+
+  * ~10 ms
+
+Case 2:
+
+* Username exists.
+* Password hashing performed.
+* Response:
+
+  * ~200 ms
+
+Attackers measure response times to identify valid usernames.
+
+---
+
+### Mitigations
+
+#### Constant-Time Comparison
+
+Use constant-time comparison algorithms.
+
+Purpose:
+
+* Prevent timing differences during password comparison.
+
+---
+
+#### Dummy Hashing / Uniform Delays
+
+Even if the user does not exist:
+
+* Perform dummy password hashing or introduce equivalent processing.
+
+Goal:
+
+* Ensure all authentication failures take approximately the same amount of time.
+
+Result:
+
+* Prevent attackers from inferring valid usernames through response timing.
+
+---
+
+# Interview Quick Revision
+
+### Authentication
+
+* Verify identity ("Who are you?")
+
+### Authorization
+
+* Verify permissions ("What can you do?")
+
+### MFA Factors
+
+* Something you know
+* Something you have
+* Something you are
+
+### Session
+
+* Stateful
+* Session ID stored on server (Redis/DB)
+* Session ID sent via HttpOnly cookie
+
+### JWT
+
+* Stateless
+* Header.Payload.Signature
+* Difficult to revoke before expiration
+* Hybrid approach: Redis blacklist
+
+### Cookie Security
+
+* HttpOnly protects against XSS by blocking JavaScript access.
+
+### OAuth 2.0
+
+* Delegated authorization
+* No password sharing
+
+### OpenID Connect (OIDC)
+
+* Adds authentication using an ID Token (JWT).
+
+### RBAC
+
+* Permissions → Roles → Users
+
+### HTTP Status
+
+* 401 Unauthorized → Authentication failed/not provided.
+* 403 Forbidden → Authentication succeeded but permission denied.
+
+### Security Best Practices
+
+* Generic authentication errors
+* Constant-time comparison
+* Dummy hashing/uniform delays
+* Prevent user enumeration
+* Mitigate timing attacks
+
+
