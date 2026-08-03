@@ -1,0 +1,195 @@
+. Introduction & Background
+Role of API Design: Backend engineers spend significant time designing APIs. Standardizing your API design eliminates guesswork and allows you to focus on business logic [
+00:00
+Opens in a new window].
+
+Common Design Dilemmas: Engineers often struggle with:
+
+Singular vs. plural URI path segments (e.g., /user vs /users).
+
+Choosing between PUT and PATCH for updates.
+
+Mapping non-CRUD operations or custom action calls to HTTP methods.
+
+Choosing the correct HTTP status codes for edge cases [
+01:18
+Opens in a new window].
+
+Shift in Web Architecture: Historical API guidelines were formed during the era of Multi-Page Applications (MPAs). Today's dominant architecture relies on Single Page Applications (SPAs), making consistent API interfaces crucial
+
+
+History & Evolution of REST
+1990 — Web Foundation: Tim Berners-Lee created the World Wide Web along with three core foundational concepts [
+05:02
+Opens in a new window]:
+
+URI (Uniform Resource Identifier) — To uniquely identify resources.
+
+HTTP (Hypertext Transfer Protocol) — The protocol for client-server communication.
+
+HTML (HyperText Markup Language) — To structure human-readable web pages.
+
+1996 — HTTP 1.1: Roy Fielding collaborated with Tim Berners-Lee to define HTTP/1.1 to address web scalability [
+13:19
+Opens in a new window].
+
+2000 — REST Introduced: In his PhD dissertation, Roy Fielding formally defined REST (Representational State Transfer) as an architectural style for scalable web systems [
+13:48
+Opens in a new window].
+
+3. Core REST Principles & Concepts
+What is a Resource & State?
+Resource: Any business entity or object exposed by the server (e.g., Users, Orders, Organizations).
+
+State: The current property values or attributes of a resource at a given time [
+17:47
+Opens in a new window].
+
+Representational State Transfer: Clients manipulate resources by transferring representations of their state (e.g., JSON, XML) via standard HTTP actions [
+18:04
+Opens in a new window].
+
+4. Designing URI Paths & Resources
+Plural Naming Convention: Always use plural nouns for collection resources (e.g., /users, /organizations) rather than singular nouns [
+01:18
+Opens in a new window].
+
+Hierarchical Nesting:
+
+Root Collection: /users
+
+Individual Item: /users/{id}
+
+Sub-resource / Related Items: /users/{id}/orders
+
+Clean & Readable URIs: Avoid using file extensions (e.g., .json, .php) or implementation details in the URI path.
+
+
+
+HTTP Status Codes Guidelines
+2xx Success:
+
+200 OK: General successful fetch or update.
+
+201 Created: Resource successfully created (typically returned with POST).
+
+204 No Content: Successful request with no body returned (e.g., after a DELETE).
+
+4xx Client Errors:
+
+400 Bad Request: Invalid body or missing required parameters.
+
+401 Unauthorized: Authentication missing or invalid.
+
+403 Forbidden: Authenticated, but user lacks permission.
+
+404 Not Found: Target resource does not exist.
+
+422 Unprocessable Entity: Valid syntax, but validation failed on business logic.
+
+5xx Server Errors:
+
+500 Internal Server Error: Server encountered an unhandled exception or crash.
+
+7. Request & Response Payload Best Practices
+Sane Defaults: Provide reasonable default values on the server side (e.g., setting status = active by default when creating an organization) so clients aren't forced to pass optional metadata [
+01:59:27
+Opens in a new window].
+
+No Abbreviations: Use readable, intuitive field names (e.g., description instead of desc, created_at instead of crt_dt). Abbreviations introduce ambiguity for API consumers [
+02:00:30
+Opens in a new window].
+
+Consistent Formatting: Stick to a single naming convention throughout payloads and query params (e.g., snake_case or camelCase).
+
+8. Essential Key Takeaways
+Design First, Code Second: An API interface should be designed completely before writing any backend code [
+02:02:05
+Opens in a new window].
+
+Language Agnostic: Proper API interface design is independent of programming languages or frameworks (Node.js, Go, Python, etc.) [
+02:03:00
+Opens in a new window].
+
+Use API Design Tools: Utilize OpenAPI/Swagger, Postman, or Insomnia during early stages to prototype, test, and preview the API interface experience for developers [
+02:02:18
+Opens in a new window].
+
+
+
+Here are the complete notes for the lecture 11. Complete REST API Design by Sriniously:
+
+1. Introduction & Background
+Role of API Design: Backend engineers spend significant time designing APIs. Standardizing your API design eliminates guesswork and allows you to focus on business logic [
+00:00
+Opens in a new window].
+
+Common Design Dilemmas: Engineers often struggle with:
+
+Singular vs. plural URI path segments (e.g., /user vs /users).
+
+Choosing between PUT and PATCH for updates.
+
+Mapping non-CRUD operations or custom action calls to HTTP methods.
+
+Choosing the correct HTTP status codes for edge cases [
+01:18
+Opens in a new window].
+
+Shift in Web Architecture: Historical API guidelines were formed during the era of Multi-Page Applications (MPAs). Today's dominant architecture relies on Single Page Applications (SPAs), making consistent API interfaces crucial [
+02:22
+Opens in a new window].
+
+2. History & Evolution of REST
+1990 — Web Foundation: Tim Berners-Lee created the World Wide Web along with three core foundational concepts [
+05:02
+Opens in a new window]:
+
+URI (Uniform Resource Identifier) — To uniquely identify resources.
+
+HTTP (Hypertext Transfer Protocol) — The protocol for client-server communication.
+
+HTML (HyperText Markup Language) — To structure human-readable web pages.
+
+1996 — HTTP 1.1: Roy Fielding collaborated with Tim Berners-Lee to define HTTP/1.1 to address web scalability [
+13:19
+Opens in a new window].
+
+2000 — REST Introduced: In his PhD dissertation, Roy Fielding formally defined REST (Representational State Transfer) as an architectural style for scalable web systems [
+13:48
+Opens in a new window].
+
+3. Core REST Principles & Concepts
+What is a Resource & State?
+Resource: Any business entity or object exposed by the server (e.g., Users, Orders, Organizations).
+
+State: The current property values or attributes of a resource at a given time [
+17:47
+Opens in a new window].
+
+Representational State Transfer: Clients manipulate resources by transferring representations of their state (e.g., JSON, XML) via standard HTTP actions [
+18:04
+Opens in a new window].
+
+4. Designing URI Paths & Resources
+Plural Naming Convention: Always use plural nouns for collection resources (e.g., /users, /organizations) rather than singular nouns [
+01:18
+Opens in a new window].
+
+Hierarchical Nesting:
+
+Root Collection: /users
+
+Individual Item: /users/{id}
+
+Sub-resource / Related Items: /users/{id}/orders
+
+Clean & Readable URIs: Avoid using file extensions (e.g., .json, .php) or implementation details in the URI path.
+
+5. HTTP Methods & Operations
+HTTP Method	Operation Type	Purpose / Description	Idempotent?
+GET	Read	Fetches single or multiple resources. Must not modify state.	Yes
+POST	Create / Action	Creates a new resource or triggers custom non-CRUD operations.	No
+PUT	Full Replace	Replaces the entire target resource state with the request payload.	Yes
+PATCH	Partial Update	Modifies only specified fields of an existing resource.	No
+DELETE	Remove	Removes the specified resource.	Yes
