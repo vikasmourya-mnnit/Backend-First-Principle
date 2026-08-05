@@ -1,0 +1,19 @@
+Common Types of Backend Errors
+Logic Errors: The most dangerous type, where code executes but produces incorrect business results, often due to misunderstood requirements or edge cases (2:06-5:10).
+Database Errors: Includes constraint violations (e.g., unique keys or foreign keys) and malformed queries caused by typos or complexity (7:08-10:16).
+External Dependencies: Services going down (outages) or hitting rate limits (429 errors), necessitating strategies like exponential backoff (13:36-17:23).
+Input Validation: The primary defense against bad data; requires strict rules on formats, ranges, and mandatory fields (17:24-19:30).
+Configuration Errors: These should be caught at system startup by validating all required environment variables to prevent runtime failures (21:13-23:45).
+Proactive Detection & Observability
+Health Checks: Implement endpoints that verify not just server uptime, but also connectivity to databases and external services (24:28-29:39).
+Monitoring: Use structural logging (JSON) and track performance metrics alongside error rates, as performance degradation is often an early warning sign of impending failure (29:40-33:23).
+Error Handling Philosophies
+Immediate Response: Differentiate between recoverable errors (use retries/backoff) and non-recoverable errors (use containment and graceful degradation) (33:35-36:20).
+Global Error Handling: Acts as a 'final safety net' middleware. It catches errors bubbled up from lower layers (repository/service), reduces code redundancy, and ensures uniform, secure error responses (41:45-56:50).
+Security Considerations
+Don't Leak Information: Never return raw database stack traces or schema details to users, as these can facilitate SQL injection attacks (1:01:08-1:04:18).
+Authentication Security: Use generic error messages (e.g., 'invalid email or password') on login endpoints to prevent attackers from identifying valid user accounts (1:05:13-1:07:29).
+Log Safety: Never log sensitive data like passwords or credit card numbers; prioritize logging user IDs or correlation IDs instead (1:07:30-1:09:25).
+
+
+Exponential backoff is an error-handling algorithm that progressively increases the wait time between retries after each failed request to avoid overwhelming a struggling or recovering system.How It WorksInstead of retrying immediately or at fixed intervals, the wait time increases exponentially based on the number of failed attempts:$$t = \text{base\_delay} \times 2^{\text{retry\_count}}$$Attempt 1: Wait $1 \text{ second}$ ($1 \times 2^0$)Attempt 2: Wait $2 \text{ seconds}$ ($1 \times 2^1$)Attempt 3: Wait $4 \text{ seconds}$ ($1 \times 2^2$)Attempt 4: Wait $8 \text{ seconds}$ ($1 \times 2^3$)Attempt 5: Wait $16 \text{ seconds}$ ($1 \times 2^4$)Key Features & Best PracticesMaximum Cap (Max Delay): Sets an upper limit on wait times (e.g., max 60 seconds) to prevent retries from waiting indefinitely.Jitter (Randomization): Adds random noise/variation to the delay interval. This prevents the thundering herd problem, where thousands of dropped clients retry simultaneously on the exact same schedule and crash the server again.Maximum Retry Limit: Stops retrying after a set number of attempts (e.g., 5 attempts) to fail gracefully.Common Use CasesAPI Rate Limiting: Responding to HTTP 429 Too Many Requests status codes.Transient Network Failures: Handling temporary socket drops, timeout errors, or DNS resolution hiccups.Microservices & Database Connections: Polling external services or re-establishing dropped backend connections
